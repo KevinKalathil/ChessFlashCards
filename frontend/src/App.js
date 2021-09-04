@@ -1,6 +1,8 @@
 import logo from './logo.svg';
 import './App.css';
 import Board from './components/board';
+import SideBar from './components/sidebar';
+import Navbar from './components/navbar';
 import { useState, useEffect } from 'react';
 
 function App() {
@@ -9,6 +11,9 @@ function App() {
   const [flashCards, setFlashCards] = useState({})
   const [currentFCCount, setCurrentFCCount] = useState(1)
   const [currentCount, setCurrentCount] = useState(0)
+  const [candidate, setCandidates] = useState([])
+  const [destination, setDestinations] = useState([])
+
   const [positions, setPositions] = useState({
     "white": {
         "P": [["a",2],["b",2],["c",2],["d",2],["e",2],["f",2],["g",2],["h",2]],
@@ -64,7 +69,6 @@ function App() {
         "Content-Type": "application/json"
       },
     }).then(getFC => getFC.json().then(data => {
-      console.log(data)
       setFlashCards(data)
     }))
 
@@ -95,22 +99,17 @@ function App() {
     if(Object.keys(flashCards).length!=0){
       setCurrentCount(0)
       setCurrentFCCount((currentFCCount+1)%(Object.keys(flashCards).length))
-      getBoard((currentFCCount+1)%(Object.keys(flashCards).length), 0)
-  
+      getBoard((currentFCCount+1)%(Object.keys(flashCards).length), 0)  
     }
 
   }
 
   function nextStep(){
-
     setCurrentCount((currentCount+1)%4)
     getBoard(currentFCCount, (currentCount+1)%4)
   }
 
   function getBoard(fcCount, stepCount){
-    console.log(flashCards)
-    console.log(currentFCCount)
-    console.log(currentCount)
     if(flashCards.length>0){
 
       const getPositions = fetch('/positions', {
@@ -126,8 +125,9 @@ function App() {
           'turn':flashCards[fcCount]['turn']
         })
       }).then(getPositions => getPositions.json().then(data => {
-        setPositions(data)
-        console.log(positions)
+        setPositions(data['positions'])
+        setCandidates(data['candidate'])
+        setDestinations(data['destination'])
       }))
   
     }
@@ -138,37 +138,26 @@ function App() {
 
   return (
     <div className="App">
-      <nav class="container flex items-center px-20 py-8">
-        <div class="text-3xl	">chess flashcards</div>
-        <ul class="hidden sm:flex flex-1 justify-end items-center gap-12">
-          <li class="cursor-pointer">home</li>
-          <li class="cursor-pointer">about</li>
-        </ul>
-      </nav>
-      <div class="flex py-1">
-        <input type='form' placeholder="Add a new game link" class="flex justify-left items-center w-1/2 sm:w-5/6 mx-20 rounded-full border border-black	px-2 py-1 focus:outline-none" onChange={(e) => handleChange(e)}></input>
-        <button type='button' class="flex justify-left items-center mx-20 rounded-full border border-black px-2 py-1 focus:outline-none"
-          onClick={async () => handleSubmit()}
-        >Search</button>
-      </div>
-
-
+      <Navbar handleChange={handleChange} handleSubmit={handleSubmit}/>
       <div class="py-2">
-        <button type='button' class="items-center mx-20 rounded-full border border-black px-2 py-1 focus:outline-none"
+        <button type='button' class="inline-block text-lg px-4 py-2 mx-8 leading-none border rounded text-black border-black hover:border-transparent hover:text-white hover:bg-red-400 mt-10 lg:mt-0"
             onClick={() => previousFC()}
           >Previous Set</button>
-        <span>{currentFCCount+1}/{flashCards.length} </span>
-        <button type='button' class="items-center mx-20 rounded-full border border-black px-5 py-1 focus:outline-none"
+        <span class="mx-4 text-lg">{currentFCCount+1}/{flashCards.length} </span>
+        <button type='button' class="inline-block text-lg px-4 py-2 mx-8 leading-none border rounded text-black border-black hover:border-transparent hover:text-white hover:bg-green-400 mt-10 lg:mt-0"
           onClick={() => nextFC()}
         >Next Set</button>
       </div>
-      <Board positions={positions}/>
-      <div>
-        <button type='button' class="items-center mx-20 rounded-full border border-black px-2 py-1 focus:outline-none"
+      <div class="grid grid-cols-2 w-2/3 gap-5">
+        <SideBar moves={flashCards} count={currentFCCount} step={currentCount}/>
+        <Board class="items-center" positions={positions} candidates={candidate} destinations={destination}/>
+      </div>
+      <div class="">
+        <button type='button' class="inline-block text-lg px-4 py-2 mx-8 leading-none border rounded text-black border-black hover:border-transparent hover:text-white hover:bg-red-400 mt-10 lg:mt-0"
               onClick={() => previousStep()}
             >Step Backward</button>
-        <span>{currentCount+1}/4</span>
-        <button type='button' class="items-center mx-20 rounded-full border border-black px-2 py-1 focus:outline-none"
+        <span class="mx-4 text-lg">{currentCount+1}/4</span>
+        <button type='button' class="inline-block text-lg px-4 py-2 mx-8 leading-none border rounded text-black border-black hover:border-transparent hover:text-white hover:bg-green-400 mt-4 lg:mt-0"
           onClick={() => nextStep()}
         >Step Forward</button>
       </div>

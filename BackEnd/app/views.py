@@ -119,12 +119,12 @@ def findCandidate(pieceType, turn, destination, attack = False, attackerColumn="
         for candidate in positions[turn][pieceType]:
             if(candidate[0]==attackerColumn and  hasPath(pieceType, turn, candidate, destination, attack)):
                 updateBoard(candidate, pieceType, turn, destination, attack)
-                return candidate
+                return [candidate]
     else:
         for candidate in positions[turn][pieceType]:
             if(hasPath(pieceType, turn, candidate, destination, attack)):
                 updateBoard(candidate, pieceType, turn, destination, attack)
-                return candidate
+                return [candidate]
 
 def QueenSideCastle(turn):
     if turn == "white":
@@ -150,10 +150,6 @@ def QueenSideCastle(turn):
                 board['a'][7] = ""
                 break
 
-    # for i in board.keys():
-    #     print(board[i])
-
-
 def KingSideCastle(turn):
     if turn == "white":
         #After castling -> Rf1 and Kg1
@@ -178,8 +174,47 @@ def KingSideCastle(turn):
                 board['h'][7] = ""
                 break
 
-    # for i in board.keys():
-    #     print(board[i])
+def getDestination(count, move):
+    turn = "white"
+    if(count%2==1): turn = "black"
+
+    if('#' in move or '+' in move): move = move[:-1]
+
+    if('x' in move):
+        attack = move.split('x')
+        return [[attack[1][0],int(attack[1][1])]]
+
+    elif('O' in move):
+        #castling
+        NumofO = move.count('O')
+        if NumofO == 2:
+            if(turn=='white'):
+                return [['g', 1], ['f',1]]
+            else:
+                return [['g', 8], ['f',8]]
+        else:
+            if(turn=='white'):
+                return [['c', 1], ['d',1]]
+            else:
+                return [['c', 8], ['d',8]]
+
+    else:
+        #move piece without taking (not castling)
+        Piece = ''
+        if((move[0]).isupper()):
+            Piece = move[0]
+        else:
+            Piece = 'P'
+            move = 'P'+move
+        
+        if(len(move)==4):
+            return [[move[2], int(move[3])]]
+        else:
+            #length is 3
+            assert(len(move) == 3)
+            return [[move[1], int(move[2])]]
+
+
 
 def stepThrough(count, move):
     turn = "white"
@@ -208,8 +243,17 @@ def stepThrough(count, move):
         NumofO = move.count('O')
         if NumofO == 2:
             KingSideCastle(turn)
+            if(turn=='white'):
+                return [['e', 1], ['h',1]]
+            else:
+                return [['e', 8], ['h',8]]
         else:
             QueenSideCastle(turn)
+            if(turn=='white'):
+                return [['e', 1], ['a',1]]
+            else:
+                return [['e', 8], ['a',8]]
+
 
     else:
         #move piece without taking (not castling)
@@ -228,9 +272,9 @@ def stepThrough(count, move):
             attacker = findCandidate(Piece, turn, [move[1], int(move[2])], False)        
 
 
-        pass
+    return attacker
 
-    return (positions, board)
+    # return attacker
 
 def extractMoves(query):
     global positions, board
@@ -364,10 +408,22 @@ def getPositions():
     global positions, board
     positions = positions1
     board = board1
+    candidate=[]
+    destination=[]
 
     count=0
     while(count<step):
-        stepThrough(count+offset, moves[count])
+        candidate = stepThrough(count+offset, moves[count])
+        destination = getDestination(count+offset, moves[count])
         count+=1
     
-    return positions
+    print({
+        'candidate': candidate,
+        'destination':destination
+    })
+
+    return {
+        'positions': positions,
+        'candidate': candidate,
+        'destination':destination,
+    }

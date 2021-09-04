@@ -1,7 +1,7 @@
 import React from 'react'
 
-export default function Board(positions) {
-    const horizontalAxis = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+export default function Board({positions, candidates, destinations}) {
+    const horizontalAxis = ["a", "b", "c", "d", "e", "f", "g", "h"]
     const verticalAxis = [8,7,6,5,4,3,2,1]
     const colors = ['green', 'white']
     let grid = {
@@ -16,13 +16,29 @@ export default function Board(positions) {
     }
 
     function styleOptions(i, j) {
-        const difference = j.charCodeAt(0) - 'a'.charCodeAt(0);
+        const difference = j.charCodeAt(0) - 'a'.charCodeAt(0)+1;
+        if(Object.keys(candidates).length !== 0){
+            for(let a=0;a<candidates.length;a++){
+                if(candidates[a][0]===j && candidates[a][1]===i){
+                    return { 'backgroundColor': 'rgb(128, 223, 255)', 'height':'80px','width':'80px' };
+                }
+            }    
+        }
+
+        if(Object.keys(destinations).length !== 0){
+            for(let a=0;a<destinations.length;a++){
+                if(destinations[a][0]===j && destinations[a][1]===i){
+                    return { 'backgroundColor': 'rgb(255, 77, 77)', 'height':'80px','width':'80px' };
+                }
+            }    
+        }
+
+
         if ((difference + i) % 2 === 0) {
-            return { 'backgroundColor': 'lightgreen', 'height':'80px','width':'80px' };
+            return { 'backgroundColor': 'rgb(125,135,150)', 'height':'80px','width':'80px' };
         }
         else {
-            return { 'backgroundColor': 'white' , 'height':'80px','width':'80px'};
-
+            return { 'backgroundColor': 'rgb(232,235,239)' , 'height':'80px','width':'80px'};
         }
 
     }
@@ -36,14 +52,12 @@ export default function Board(positions) {
 
             })
         )
+        console.log(grid)
         // console.log(positions['positions'])
-        Object.keys(positions['positions']).map((color) =>
-            Object.keys(positions['positions'][color]).map((piece) => {
-                // console.log('Color', color)
-                // console.log('piece', piece)
-                // console.log(positions['positions'][color][piece])
-                Object.keys(positions['positions'][color][piece]).map((j) =>
-                    grid[positions['positions'][color][piece][j][0]][positions['positions'][color][piece][j][1]] = '/ChessPieces/'+color+'/'+piece+'.png'
+        Object.keys(positions).map((color) =>
+            Object.keys(positions[color]).map((piece) => {
+                Object.keys(positions[color][piece]).map((j) =>
+                    grid[positions[color][piece][j][0]][positions[color][piece][j][1]] = '/ChessPieces/'+color+'/'+piece+'.png'
                 )
             })
         )
@@ -62,19 +76,14 @@ export default function Board(positions) {
 
 
     return (
-        <div class="container flex justify-center mx-auto">
+        <div class="container flex mx-auto">
             {loadGrid()}
-            <div class="grid grid-cols-8 my-5 ring-8 ring-gray-400">
+            <div class="grid grid-cols-8 my-5">
                 {
                     verticalAxis.map((color) =>
                         horizontalAxis.map((i) =>
-                            <div class="justify-center px-3 py-2" style={styleOptions(color, i)}>
-                                {
-                                    console.log(2)
-                                    
-
-                                }
-                                <img onLoad={checkValid(grid[i][color])} style={imageStyleOptions()} src={grid[i][color]}></img>
+                            <div class="justify-center px-2 py-2" style={styleOptions(color, i)}>
+                                <img style={imageStyleOptions()} src={grid[i][color]}></img>
                             </div>
                         )
                     )
