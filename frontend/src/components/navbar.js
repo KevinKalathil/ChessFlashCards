@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import {FaChessBoard} from 'react-icons/fa';
 
 export default function Navbar({handleChange, handleSubmit}) {
     return (
@@ -10,8 +11,9 @@ export default function Navbar({handleChange, handleSubmit}) {
         //     </ul>
         // </nav>
         <nav class="flex items-center bg-black p-8 mb-5">
-                <i class="fas fa-chess-knight"></i>
-            <div class="flex items-center flex-shrink-0 text-white mr-6">
+
+            <div class="flex items-center text-white mr-6">
+                <FaChessBoard class="mr-3" size={30}/> 
                 <span class="font-semibold text-2xl tracking-tight">Chess FlashCards</span>
             </div>
             <div class="w-full block flex-grow lg:flex lg:items-center lg:w-auto">

@@ -148,6 +148,7 @@ function App() {
           onClick={() => nextFC()}
         >Next Set</button>
       </div>
+      <span class="fas fa-camera"></span>
       <div class="grid grid-cols-2 w-2/3 gap-5">
         <SideBar moves={flashCards} count={currentFCCount} step={currentCount}/>
         <Board class="items-center" positions={positions} candidates={candidate} destinations={destination}/>
